@@ -5,7 +5,7 @@ pipeline{
 	}
 	//agent {label "${params.system_type}"}
 	agent {
-		docker {image 'debian:12'}
+		dockerContainer {image 'debian:12'}
 	}
 	stages{
 		stage('pre-Build'){
