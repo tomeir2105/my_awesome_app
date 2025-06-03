@@ -6,7 +6,7 @@ pipeline{
 	//agent {label "${params.system_type}"}
 	agent {
 		dockerContainer {
-			image 'debian:12'
+			image 'openjdk:latest'
 		}
 	}
 	stages{
