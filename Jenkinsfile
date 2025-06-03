@@ -60,7 +60,7 @@ pipeline{
 		}
 	}
 	post {
-		unsuccess{
+		unsuccessful{
 			cleanWs cleanWhenSuccess: false
 		}
 		success{
