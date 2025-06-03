@@ -32,13 +32,14 @@ pipeline{
 		stage('test'){
 			steps{
 		sh '''
-	            if curl localhost:8080 &> /dev/null;then
+				set -e
+	            if curl localhost:8000 &> /dev/null;then
                         echo 'post test: success'
                     else
                         echo 'post test: fail'
                         exit 1
                     fi
-                    if curl localhost:8080/jenkins &> /dev/null;then
+                    if curl localhost:8000/jenkins &> /dev/null;then
                         echo 'post test with variable: success'
                     else
                         echo 'post test with variable: fail'
