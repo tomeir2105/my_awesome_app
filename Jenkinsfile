@@ -1,7 +1,7 @@
 pipeline{
 	parameters {
 		string(name: 'sleep_time', defaultValue: "2", description: 'time to sleep after build stage')
-		choice(name: 'system_type', choises: ['debian', 'redhat'], description: 'type of agent')
+		choice(name: 'system_type', choices: ['debian', 'redhat'], description: 'type of agent')
 	}
 	agent {label "${params.system_type}"}
 	stages{
