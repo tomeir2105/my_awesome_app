@@ -51,7 +51,7 @@ pipeline{
 	}
 	post {
 		unsuccessful{
-			cleanWs cleanWhenSuccessful: false
+			cleanWs cleanWhenSuccess: false
 		}
 		success{
 				archiveArtifacts artifacts: 'dist/', followSymlinks: false
