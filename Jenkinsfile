@@ -20,12 +20,13 @@ pipeline{
 
 		stage('build'){
 			steps{
-		sh '''                   
-			python3 app.py &
-		 	 chmod 777 /home/jenkins/.local/bin/pyinstaller
-		    	/home/jenkins/.local/bin/pyinstaller  app.py
-		'''
-			}		
+				sh '''                   
+					python3 app.py &
+		 			chmod 777 /home/jenkins/.local/bin/pyinstaller
+		    		/home/jenkins/.local/bin/pyinstaller  app.py
+				'''
+				archiveArtifacts artifacts: 'dist', followSymlinks: false
+			}
 		}
 	
 		stage('test'){
