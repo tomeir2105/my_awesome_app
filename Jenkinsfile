@@ -23,7 +23,7 @@ pipeline{
 				sh '''                   
 					python3 app.py &
 		 			chmod 777 /home/jenkins/.local/bin/pyinstaller
-		    		/home/jenkins/.local/bin/pyinstaller  app.py
+		    		/home/jenkins/.local/bin/pyinstaller  app.py -y
 				'''
 				archiveArtifacts artifacts: 'dist/', followSymlinks: false
 			}
