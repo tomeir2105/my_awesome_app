@@ -1,5 +1,9 @@
 pipeline{
-	agent any
+	parameters {
+		string(nane: 'sleep_time', defaultValue: 2, description: 'time to sleep after build stage')
+		choice(name: 'system_type', choises['debian', 'redhat'], description: 'type of agent')
+	}
+	agent ${param.system_type}
 	stages{
 		stage('pre-Build'){
 			steps{
@@ -20,11 +24,12 @@ pipeline{
 
 		stage('build'){
 			steps{
-				sh '''                   
+				sh """                 
 					python3 app.py &
 		 			chmod 777 /home/jenkins/.local/bin/pyinstaller
-		    		/home/jenkins/.local/bin/pyinstaller  app.py -y
-				'''
+		    		/home/jenkins/.local/bin/pyinstaller app.py -y
+					sleep ${params.sleep_time}
+				"""
 			}
 		}
 	
