@@ -3,7 +3,7 @@ pipeline{
 		string(nane: 'sleep_time', defaultValue: 2, description: 'time to sleep after build stage')
 		choice(name: 'system_type', choises['debian', 'redhat'], description: 'type of agent')
 	}
-	agent ${params.system_type}
+	agent {label ${params.system_type}}
 	stages{
 		stage('pre-Build'){
 			steps{
