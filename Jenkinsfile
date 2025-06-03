@@ -25,7 +25,7 @@ pipeline{
 		 			chmod 777 /home/jenkins/.local/bin/pyinstaller
 		    		/home/jenkins/.local/bin/pyinstaller  app.py
 				'''
-				archiveArtifacts artifacts: 'dist', followSymlinks: false
+				archiveArtifacts artifacts: 'dist/', followSymlinks: false
 			}
 		}
 	
