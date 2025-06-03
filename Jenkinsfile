@@ -5,7 +5,7 @@ pipeline{
 	}
 	//agent {label "${params.system_type}"}
 	agent {
-		docker {
+		dockerContainer {
 			image 'debian:12'
 		}
 	}
