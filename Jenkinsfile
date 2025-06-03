@@ -6,7 +6,7 @@ pipeline{
 			sh '''
 			sudo apt-get update 
 			sudo apt-get install -y python3 python3-flask git pylint pipx
-			pip install pyinstaller
+			pipx install pyinstaller
 			'''		
 			}		
 		}
