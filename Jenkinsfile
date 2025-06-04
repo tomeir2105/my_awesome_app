@@ -8,7 +8,6 @@ pipeline{
 	agent {
 		dockerContainer {
 			image 'jenkins/inbound-agent'
-			credentialsId 'root'
 		}
 	}
 	
