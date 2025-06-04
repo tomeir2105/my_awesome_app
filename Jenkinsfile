@@ -32,7 +32,6 @@ pipeline{
 		stage('build'){
 			steps{
 				sh """                 
-					python3 app.py &
 		 			chmod 777 /home/jenkins/.local/bin/pyinstaller
 		    		/home/jenkins/.local/bin/pyinstaller app.py -y
 					sleep ${params.sleep_time}
@@ -42,8 +41,10 @@ pipeline{
 	
 		stage('test'){
 			steps{
-				sh '''
+				sh """
 				set -e
+				python3 app.py &
+				sleep ${params.sleep_time}
 	            if curl localhost:8000 &> /dev/null;then
                         echo 'post test: success'
                     else
@@ -56,7 +57,7 @@ pipeline{
                         echo 'post test with variable: fail'
                         exit 1
                     fi
-				'''
+				"""
 	
 			}		
 		}
