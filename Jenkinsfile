@@ -3,20 +3,20 @@ pipeline{
 		string(name: 'sleep_time', defaultValue: "2", description: 'time to sleep after build stage')
 		choice(name: 'system_name', choices: ['worker1', 'worker2'], description: 'Agent name')
 	}
-	agent {label "${params.system_name}"}
-	/*
+	//agent {label "${params.system_name}"}
+	
 	agent {
 		dockerContainer {
 			image 'openjdk:latest'
 		}
 	}
-	*/
+	
 	stages{
 		stage('pre-Build'){
 			steps{
 			sh '''
 			sudo apt-get update 
-			sudo apt-get install -y python3 python3-flask git pylint pipx
+			sudo apt-get install -y python3 python3-flask git pylint pipx curl
 			pipx install pyinstaller
 			'''		
 			}		
