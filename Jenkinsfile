@@ -1,14 +1,16 @@
 pipeline{
 	parameters {
 		string(name: 'sleep_time', defaultValue: "2", description: 'time to sleep after build stage')
-		choice(name: 'system_type', choices: ['debian', 'redhat'], description: 'type of agent')
+		choice(name: 'system_name', choices: ['worker1', 'worker2'], description: 'Agent name')
 	}
-	//agent {label "${params.system_type}"}
+	agent {label "${params.system_name}"}
+	/*
 	agent {
 		dockerContainer {
 			image 'openjdk:latest'
 		}
 	}
+	*/
 	stages{
 		stage('pre-Build'){
 			steps{
@@ -40,7 +42,7 @@ pipeline{
 	
 		stage('test'){
 			steps{
-		sh '''
+				sh '''
 				set -e
 	            if curl localhost:8000 &> /dev/null;then
                         echo 'post test: success'
@@ -54,7 +56,7 @@ pipeline{
                         echo 'post test with variable: fail'
                         exit 1
                     fi
-		'''
+				'''
 	
 			}		
 		}
