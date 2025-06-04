@@ -7,7 +7,9 @@ pipeline{
 	
 	agent {
 		dockerContainer {
-			image 'jenkins/inbound-agent'
+			//image 'jenkins/inbound-agent'
+			image 'baruchgu/jenkins-agent-with-sudo'
+			
 		}
 	}
 	
