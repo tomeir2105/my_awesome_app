@@ -7,7 +7,8 @@ pipeline{
 	
 	agent {
 		dockerContainer {
-			image 'jenkins/inbound-agent:latest'
+			image 'jenkins/inbound-agent'
+			credentialsId 'root'
 		}
 	}
 	
