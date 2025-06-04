@@ -18,7 +18,7 @@ pipeline{
 			steps{
 			sh '''
 			sudo apt-get update 
-			sudo apt-get install -y python3 python3-flask git pylint pipx curl
+			sudo apt-get install -y python3 python3-flask git pylint pipx curl binutils 
 			pipx install pyinstaller
 			'''		
 			}		
