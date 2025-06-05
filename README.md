@@ -34,7 +34,7 @@ RUN echo "jenkins ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 USER jenkins  
 EOI
 ```  
-  3.2 Build the image (modify mycompany to your account in [GitHub](https://hub.docker.com/))  
+  3.2 Build the image (modify `mycompany` to your account in [GitHub](https://hub.docker.com/))  
 `docker build -t mycompany/jenkins-agent-with-sudo -f Dockerfile.deb.agent-with-sudo .`  
   3.3 Upload the image to GitHub repository
 `docker login -u mycompany`  
@@ -44,10 +44,10 @@ EOI
 ### 4. Launch Jenkins docker containers   
   4.1 `cd jenkins-shallow-dive/99_misc/setup/docker`  
   4.2 Modify Dockerfile.deb.worker  
-    - remove lines with "&& TEMP_DEB" and "&& dpkg -i ...", lines 5,6  
+    - remove lines with `&& TEMP_DEB` and `&& dpkg -i ...`, lines 5,6  
     - add `curl` to `apt-get install` arguments, line 3  
   4.3 Modify Dockerfile.main  
-    - remove lines with "&& TEMP_DEB" and "&& dpkg -i ...", lines 5,6  
+    - remove lines with `&& TEMP_DEB` and `&& dpkg -i ...`, lines 5,6  
     - remove line `RUN jenkins-plugin-cli --plugins`  
     - add this at end `RUN mkdir /etc/docker && echo '{ "dns": ["8.8.8.8", "8.8.4.4"] }' > /etc/docker/daemon.json`   
   4.4 Open the permission on the Host linux  
@@ -71,7 +71,7 @@ EOI
   5.3 Add parameter `sleep_time`   
 ```
 parameters {  
-	string(name: 'sleep_time', defaultValue: "4", description: 'time to sleep after build stage')  
+	string(name: 'sleep_time', defaultValue: "4", description: 'time to sleep after application launch')  
 }   
 ```  
   5.4 Add this at top of the `Test` stage script, use triple """ quotes surround  
@@ -91,8 +91,10 @@ parameters {
   - Docker Pipeline  
 
 6.3 Open New cloud at `http://localhost/manage/cloud/`  
-  - Name - as you wish  , ex: docker_agent
+  - Name - as you wish, ex: docker_agent
   - `Docker Host URI` set `unix:///var/run/docker.sock`  
+
+Note: This enables Jenkins to dynamically launch build agents (workers) inside Docker containers on demand, instead of relying on pre-configured static nodes.
 
 6.4 Open New Item `my_awesome_app` as pipeline type with configurations:
   - `Definition` choose `Pipeline script from SCM`
