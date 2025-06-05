@@ -52,7 +52,7 @@ EOI
     - add this at end `RUN mkdir /etc/docker && echo '{ "dns": ["8.8.8.8", "8.8.4.4"] }' > /etc/docker/daemon.json`   
   4.4 Open the permission on the Host linux  
   `sudo chmod a+r /var/run/docker.sock`  
-  4.5 Open DNS on the Host linux
+  4.5 Open DNS on the Host linux  
   ```sh
   sudo mkdir /etc/docker
   sudo echo '{ "dns": ["8.8.8.8", "1.1.1.1"] }' > /etc/docker/daemon.json
