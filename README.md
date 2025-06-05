@@ -20,7 +20,7 @@ The steps below describe whole the process I pass in order to arrive the final t
 ### 2. Clone the Jenkins course repository to local Host  
 `git clone https://gitlab.com/vaiolabs-io/jenkins-shallow-dive`
 
-### 3 Prepare custom jenkins node image with git and sudo
+### 3 Prepare custom image with git and sudo for Jenkins node
 _Build your image with the steps below or, alternively, You are welcome to use my image_ `baruchgu/jenkins-agent-with-sudo`  
 <details><summary>Build your image</summary>
 
