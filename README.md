@@ -1,19 +1,28 @@
 # Run an application in docker container by Jenkins
 ## 📌 Project Overview
 The class practice includes:
-- Launch the docker composed based lab from [Jenkins-examples](https://gitlab.com/vaiolabs-io/jenkins-examples)
-- Define agnet as dockerin [Jenkinsfile](./Jenkinsfile)
-- Run and test a simple application a simple [application](https://gitlab.com/silent-mobius/my_awesome_app) (Flask+python) in docker Jenkins node
+- Launch the docker composed based lab from [jenkins-shallow-dive](https://gitlab.com/vaiolabs-io/jenkins-shallow-dive)
+- Define agent as docker in [Jenkinsfile](./Jenkinsfile)
+- Run and test a simple [application](https://gitlab.com/silent-mobius/my_awesome_app) (Flask+python) in docker Jenkins node
+
+## Prerequisite
+- Linux node host
+- Installed packages: bash, git and docker
+- Write access to [GitLab](https://gitlab.com)
+- Account in [DockerHub](https://hub.docker.com)
+
 ## 👣 Steps
 The steps below describe whole the process I pass in order to arrive the final target when the application runs in the docker node and provides the correct response.
-### 1. Fork the [application](https://gitlab.com/silent-mobius/my_awesome_app) repository to my GitLab [account](https://gitlab.com/baruch.gudesblat)
+### 1. Prepare the application
+- Fork the [application](https://gitlab.com/silent-mobius/my_awesome_app) repository to my GitLab [account](https://gitlab.com/baruch.gudesblat)  
+- Verify the `debug` mode in application is disabled. File app.py - `debug=False`
 
-### 2. Clone the Jenkins course repository to local Host from  
-`git clone https://gitlab.com/vaiolabs-io/ansible-shallow-dive`
+### 2. Clone the Jenkins course repository to local Host  
+`git clone https://gitlab.com/vaiolabs-io/jenkins-shallow-dive`
 
 ### 3 Prepare custom jenkins node image with git and sudo
 _Build your image with the steps below or, alternively, You are welcome to use my image_ `baruchgu/jenkins-agent-with-sudo`  
-<details>
+<details><summary>Build your image</summary>
 
   3.1 Add new file Dockerfile.deb.agent-with-sudo  
 ```sh
@@ -29,10 +38,10 @@ EOI
 `docker build -t mycompany/jenkins-agent-with-sudo -f Dockerfile.deb.agent-with-sudo .`  
   3.3 Upload the image to GitHub repository
 `docker login -u mycompany`  
-`docker push mycompany/jenkins-agent-with-sudo`  
+`docker push mycompany/jenkins-agent-with-sudo`    
 </details>
 
-### 4. Launch Jenkins docker containers  
+### 4. Launch Jenkins docker containers   
   4.1 `cd jenkins-shallow-dive/99_misc/setup/docker`  
   4.2 Modify Dockerfile.deb.worker  
     - remove lines with "&& TEMP_DEB" and "&& dpkg -i ...", lines 5,6  
@@ -41,9 +50,14 @@ EOI
     - remove lines with "&& TEMP_DEB" and "&& dpkg -i ...", lines 5,6  
     - remove line `RUN jenkins-plugin-cli --plugins`  
     - add this at end `RUN mkdir /etc/docker && echo '{ "dns": ["8.8.8.8", "8.8.4.4"] }' > /etc/docker/daemon.json`   
-  4.4 Open the permission on Host linux:  
-  `chmod a+r /var/run/docker.sock`  
-  4.5 Launch the docker compose  
+  4.4 Open the permission on the Host linux  
+  `sudo chmod a+r /var/run/docker.sock`  
+  4.5 Open DNS in the Host linux
+  ```sh
+  mkdir /etc/docker
+  echo '{ "dns": ["8.8.8.8", "1.1.1.1"] }' > /etc/docker/daemon.json
+  ```
+  4.6 Launch the docker compose  
   `docker compose up -d`
 
 ### 5. Prepare Jenkinsfile in this repository
@@ -60,14 +74,13 @@ parameters {
 	string(name: 'sleep_time', defaultValue: "4", description: 'time to sleep after build stage')  
 }   
 ```  
-  5.4 Add in `Test` stage script and use triple """ quotes surround  
+  5.4 Add this at top of the `Test` stage script, use triple """ quotes surround  
   ```sh
   set -e
   python3 app.py &
   sleep ${params.sleep_time}  
   ```
-  5.5 Modify the application port    
-  `if curl localhost:8000`  
+  5.5 Modify the application port at `curl localhost:8000`  
   5.6 Commit the changes to GitLab
 
 ### 6. Launch and setup Jenkins server
@@ -88,6 +101,7 @@ parameters {
   - `Credentials` -none-
   - `Branch` set `*/main`
   - `Script Path` as a default `Jenkinsfile`  
+
 Note: the python application app.py is installed in the pipeline workspace as a side effect when Jenkins fetches whole the repository as is defined in `Repository URL`
 
 ### 7. Run the pipeline Build
@@ -95,14 +109,11 @@ Note: the python application app.py is installed in the pipeline workspace as a 
 - Click `Build with Parameters`
 - Expect the green success mark
 
-
-!-- CONTRIBUTORS -->
 ## 👥 Contributors
 [Baruch](https://github.com/baruchgu) - Owner
 
-<!-- LINKS -->
 ## 🌐 Links
-* [Jenkins Shallow Dive course](https://gitlab.com/vaiolabs-io/jenkins-examples)
+* [Jenkins Shallow Dive course](https://gitlab.com/vaiolabs-io/jenkins-shallow-dive)
 * [Awesome application](https://gitlab.com/silent-mobius/my_awesome_app)
 * [Docker Hub](https://www.hub.docker.com)
 * [GitLab](https://gitlab.com)
