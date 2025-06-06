@@ -7,7 +7,7 @@ pipeline{
 	//agent {label "${params.system_name}"}
 	agent {
 //		dockerContainer {	image 'baruchgu/jenkins-agent-with-sudo'}
-		{label 'd-workers'}
+		label 'd-workers'
 	}
 	stages{
 		stage('pre-Build'){
