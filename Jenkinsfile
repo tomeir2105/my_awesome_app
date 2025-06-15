@@ -62,41 +62,42 @@ pipeline {
         }
         
         stage('test') {
-            steps {
-                sh """
-                    set -e
-                    echo "== Starting Flask app in background =="
-                    nohup python3 app.py > flask.log 2>&1 &
-                    APP_PID=\$!
-        
-                    echo "== Waiting ${params.sleep_time} seconds for app to start =="
-                    sleep ${params.sleep_time}
-        
-                    echo "== Testing endpoints =="
-                    if curl -s localhost:8000 > /dev/null; then
-                        echo 'Basic route test: success'
-                    else
-                        echo 'Basic route test: fail'
-                        kill \$APP_PID
-                        exit 1
-                    fi
-        
-                    if curl -s localhost:8000/jenkins > /dev/null; then
-                        echo 'Custom route test: success'
-                    else
-                        echo 'Custom route test: fail'
-                        kill \$APP_PID
-                        exit 1
-                    fi
-        
-                    echo "== Holding Flask app for ${params.keep_alive_minutes} minute(s) =="
-                    sleep \$(( ${params.keep_alive_minutes} * 60 ))
-        
-                    echo "== Done. Killing Flask app =="
-                    kill \$APP_PID || true
-                """
-            }
-        }
+    steps {
+        sh """
+            set -e
+            echo "== Starting Flask app in background =="
+            nohup python3 app.py > flask.log 2>&1 &
+            APP_PID=\$!
+
+            echo "== Waiting ${params.sleep_time} seconds for app to start =="
+            sleep ${params.sleep_time}
+
+            echo "== Testing endpoints =="
+            if curl -s localhost:8000 > /dev/null; then
+                echo 'Basic route test: success'
+            else
+                echo 'Basic route test: fail'
+                kill \$APP_PID
+                exit 1
+            fi
+
+            if curl -s localhost:8000/jenkins > /dev/null; then
+                echo 'Custom route test: success'
+            else
+                echo 'Custom route test: fail'
+                kill \$APP_PID
+                exit 1
+            fi
+
+            echo "== Holding Flask app for ${params.keep_alive_minutes} minute(s) =="
+            sleep \$(( ${params.keep_alive_minutes} * 60 ))
+
+            echo "== Done. Killing Flask app =="
+            kill \$APP_PID || true
+        """
+    }
+}
+
 
     }
 
