@@ -12,10 +12,8 @@ pipeline {
             steps {
                 sh '''
                     set -e
-        
-                    echo "== Fixing system time =="
-                    sudo apt-get install -y ntpdate
-                    sudo ntpdate time.google.com
+                    echo "== Disabling APT timestamp validity check =="
+                    sudo sh -c 'echo Acquire::Check-Valid-Until \\"false\\"; > /etc/apt/apt.conf.d/99no-check-valid-until'
         
                     echo "== Updating system packages =="
                     sudo apt-get update
@@ -23,16 +21,12 @@ pipeline {
                     echo "== Installing required packages =="
                     sudo apt-get install -y python3 python3-venv python3-flask python3-dev git curl binutils python3-pip pipx pylint
         
-                    echo "== PATH before modifying =="
-                    echo $PATH
-        
                     export PATH="$HOME/.local/bin:$PATH"
-        
-                    echo "== PATH after adding ~/.local/bin =="
-                    echo $PATH
+                    echo "== PATH set to: $PATH"
                 '''
             }
         }
+
 
 
         stage('install-pyinstaller') {
