@@ -34,17 +34,9 @@ pipeline {
                 sh '''
                     set -e
                     export PATH="$HOME/.local/bin:$PATH"
-
-                    echo "== Checking if pyinstaller is already installed =="
-                    if ! command -v pyinstaller > /dev/null; then
-                        echo "Installing pyinstaller with pipx..."
-                        pipx install pyinstaller
-                    else
-                        echo "PyInstaller is already installed at: $(which pyinstaller)"
-                    fi
-
-                    echo "== pyinstaller binary =="
-                    ls -l $(which pyinstaller) || echo "pyinstaller not found"
+        
+                    echo "== Forcing reinstallation of pyinstaller =="
+                    pipx install --force pyinstaller
                 '''
             }
         }
