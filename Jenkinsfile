@@ -1,70 +1,94 @@
-pipeline{
-	parameters {
-		string(name: 'sleep_time', defaultValue: "4", description: 'time to sleep after build stage')
-		//choice(name: 'system_name', choices: ['worker1', 'worker2'], description: 'Agent name')
-	}
-	
-	//agent {label "${params.system_name}"}
-	agent {
-		label 'git-agent'
-	}
-	stages{
-		stage('pre-Build'){
-			steps{
-				sh '''
-					sudo apt-get update 
-					sudo apt-get install -y python3 python3-flask python3-dev git pylint pipx curl binutils 
-					pipx install pyinstaller
-				'''
-			}		
-		}
-		stage('lint'){
-			steps{
-				sh 'pylint --disable=missing-docstring,invalid-name app.py'
-			}		
-		}
+pipeline {
+    parameters {
+        string(name: 'sleep_time', defaultValue: "4", description: 'Time to sleep after build stage')
+        //choice(name: 'system_name', choices: ['worker1', 'worker2'], description: 'Agent name')
+    }
 
-		stage('build'){
-			steps{
-				sh '''                 
-		 			chmod +x /home/jenkins/.local/bin/pyinstaller
-		    		/home/jenkins/.local/bin/pyinstaller app.py -y
-				'''
-			}
-		}
-	
-		stage('test'){
-			steps{
-				sh """
-				set -e
-				python3 app.py &
-				sleep ${params.sleep_time}
-	            if curl localhost:8000 &> /dev/null;then
-                    echo 'post test: success'
-                else
-                    echo 'post test: fail'
-                    exit 1
-                fi
-                if curl localhost:8000/jenkins &> /dev/null;then
-                    echo 'post test with variable: success'
-                else
-                    echo 'post test with variable: fail'
-                    exit 1
-                fi
-				"""
-	
-			}		
-		}
-	}
-	post {
-		unsuccessful{
-			cleanWs cleanWhenSuccess: false
-		}
-		success{
-				archiveArtifacts artifacts: 'dist/', followSymlinks: false
-		}
-	}
+    agent {
+        label 'git-agent'
+    }
+
+    stages {
+        stage('Pre-Build') {
+            steps {
+                sh '''
+                    set -e
+                    sudo apt-get update
+                    sudo apt-get install -y python3 python3-flask python3-dev git curl binutils python3-venv
+
+                    # Install pipx if missing
+                    if ! command -v pipx &> /dev/null; then
+                        python3 -m pip install --user pipx
+                        ~/.local/bin/pipx ensurepath
+                        export PATH="$HOME/.local/bin:$PATH"
+                    fi
+
+                    # Install pyinstaller if not already installed
+                    ~/.local/bin/pipx list | grep -q pyinstaller || ~/.local/bin/pipx install pyinstaller
+                '''
+            }
+        }
+
+        stage('Lint') {
+            steps {
+                sh '''
+                    echo "Running pylint on app.py"
+                    pylint --disable=missing-docstring,invalid-name app.py
+                '''
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh '''
+                    echo "Building app with PyInstaller"
+                    chmod +x ${HOME}/.local/bin/pyinstaller
+                    ${HOME}/.local/bin/pyinstaller app.py -y
+                '''
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh """
+                    echo "Starting app for test..."
+                    python3 app.py &
+                    APP_PID=\$!
+
+                    echo "Sleeping for ${params.sleep_time} seconds"
+                    sleep ${params.sleep_time}
+
+                    if curl -s localhost:8000 > /dev/null; then
+                        echo 'Basic route test: success'
+                    else
+                        echo 'Basic route test: fail'
+                        kill \$APP_PID
+                        exit 1
+                    fi
+
+                    if curl -s localhost:8000/jenkins > /dev/null; then
+                        echo 'Custom route test: success'
+                    else
+                        echo 'Custom route test: fail'
+                        kill \$APP_PID
+                        exit 1
+                    fi
+
+                    echo "Killing app process after tests"
+                    kill \$APP_PID || true
+                """
+            }
+        }
+    }
+
+    post {
+        unsuccessful {
+            echo "Build failed — cleaning workspace"
+            cleanWs cleanWhenSuccess: false
+        }
+        success {
+            echo "Build succeeded — archiving artifacts"
+            archiveArtifacts artifacts: 'dist/**', followSymlinks: false
+        }
+    }
 }
-
-
-
