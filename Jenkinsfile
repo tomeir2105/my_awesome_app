@@ -14,14 +14,16 @@ pipeline {
             steps {
                 sh '''
                     set -e
+                    export PATH="$HOME/.local/bin:$PATH"
                     sudo apt-get update
                     sudo apt-get install -y python3 python3-venv python3-flask python3-dev git curl binutils python3-pip pipx pylint
-
+        
                     echo "Using pipx from: $(which pipx)"
                     pipx list | grep -q pyinstaller || pipx install pyinstaller
                 '''
             }
         }
+
 
         stage('lint') {
             steps {
