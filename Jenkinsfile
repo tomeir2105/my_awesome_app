@@ -1,6 +1,7 @@
 pipeline {
     parameters {
         string(name: 'sleep_time', defaultValue: "4", description: 'Time to sleep after build stage')
+        string(name: 'keep_alive_minutes', defaultValue: '0', description: 'How long to keep Flask app alive (in minutes)')
     }
 
     agent {
@@ -59,17 +60,19 @@ pipeline {
                 '''
             }
         }
-
+        
         stage('test') {
             steps {
                 sh """
-                    echo "== Starting app for test =="
-                    python3 app.py &
+                    set -e
+                    echo "== Starting Flask app in background =="
+                    nohup python3 app.py > flask.log 2>&1 &
                     APP_PID=\$!
-
-                    echo "== Sleeping for ${params.sleep_time} seconds =="
+        
+                    echo "== Waiting ${params.sleep_time} seconds for app to start =="
                     sleep ${params.sleep_time}
-
+        
+                    echo "== Testing endpoints =="
                     if curl -s localhost:8000 > /dev/null; then
                         echo 'Basic route test: success'
                     else
@@ -77,7 +80,7 @@ pipeline {
                         kill \$APP_PID
                         exit 1
                     fi
-
+        
                     if curl -s localhost:8000/jenkins > /dev/null; then
                         echo 'Custom route test: success'
                     else
@@ -85,12 +88,16 @@ pipeline {
                         kill \$APP_PID
                         exit 1
                     fi
-
-                    echo "== Killing app process after tests =="
+        
+                    echo "== Holding Flask app for ${params.keep_alive_minutes} minute(s) =="
+                    sleep \$(( ${params.keep_alive_minutes} * 60 ))
+        
+                    echo "== Done. Killing Flask app =="
                     kill \$APP_PID || true
                 """
             }
         }
+
     }
 
     post {
