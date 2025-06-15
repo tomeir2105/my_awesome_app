@@ -1,10 +1,8 @@
 pipeline {
     parameters {
         string(name: 'sleep_time', defaultValue: "4", description: 'Time to sleep after build stage')
-        // choice(name: 'system_name', choices: ['worker1', 'worker2'], description: 'Agent name')
     }
 
-    // agent { label "${params.system_name}" }
     agent {
         label 'git-agent'
     }
@@ -14,21 +12,44 @@ pipeline {
             steps {
                 sh '''
                     set -e
-                    export PATH="$HOME/.local/bin:$PATH"
+                    echo "== Updating system packages =="
                     sudo apt-get update
                     sudo apt-get install -y python3 python3-venv python3-flask python3-dev git curl binutils python3-pip pipx pylint
-        
-                    echo "Using pipx from: $(which pipx)"
-                    pipx list | grep -q pyinstaller || pipx install pyinstaller
+
+                    echo "== PATH before modifying =="
+                    echo $PATH
+
+                    export PATH="$HOME/.local/bin:$PATH"
+                    echo "== PATH after adding ~/.local/bin =="
+                    echo $PATH
                 '''
             }
         }
 
+        stage('install-pyinstaller') {
+            steps {
+                sh '''
+                    set -e
+                    export PATH="$HOME/.local/bin:$PATH"
+
+                    echo "== Checking if pyinstaller is already installed =="
+                    if ! command -v pyinstaller > /dev/null; then
+                        echo "Installing pyinstaller with pipx..."
+                        pipx install pyinstaller
+                    else
+                        echo "PyInstaller is already installed at: $(which pyinstaller)"
+                    fi
+
+                    echo "== pyinstaller binary =="
+                    ls -l $(which pyinstaller) || echo "pyinstaller not found"
+                '''
+            }
+        }
 
         stage('lint') {
             steps {
                 sh '''
-                    echo "Running pylint on app.py"
+                    echo "== Running pylint on app.py =="
                     pylint --disable=missing-docstring,invalid-name app.py
                 '''
             }
@@ -37,8 +58,9 @@ pipeline {
         stage('build') {
             steps {
                 sh '''
-                    echo "Building with pyinstaller"
-                    pyinstaller app.py -y
+                    export PATH="$HOME/.local/bin:$PATH"
+                    echo "== Building with pyinstaller =="
+                    pyinstaller app.py -y || { echo "PyInstaller build failed"; exit 1; }
                 '''
             }
         }
@@ -46,11 +68,11 @@ pipeline {
         stage('test') {
             steps {
                 sh """
-                    echo "Starting app for test..."
+                    echo "== Starting app for test =="
                     python3 app.py &
                     APP_PID=\$!
 
-                    echo "Sleeping for ${params.sleep_time} seconds"
+                    echo "== Sleeping for ${params.sleep_time} seconds =="
                     sleep ${params.sleep_time}
 
                     if curl -s localhost:8000 > /dev/null; then
@@ -69,7 +91,7 @@ pipeline {
                         exit 1
                     fi
 
-                    echo "Killing app process after tests"
+                    echo "== Killing app process after tests =="
                     kill \$APP_PID || true
                 """
             }
