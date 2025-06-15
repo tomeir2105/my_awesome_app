@@ -12,19 +12,28 @@ pipeline {
             steps {
                 sh '''
                     set -e
+        
+                    echo "== Fixing system time =="
+                    sudo apt-get install -y ntpdate
+                    sudo ntpdate time.google.com
+        
                     echo "== Updating system packages =="
                     sudo apt-get update
+        
+                    echo "== Installing required packages =="
                     sudo apt-get install -y python3 python3-venv python3-flask python3-dev git curl binutils python3-pip pipx pylint
-
+        
                     echo "== PATH before modifying =="
                     echo $PATH
-
+        
                     export PATH="$HOME/.local/bin:$PATH"
+        
                     echo "== PATH after adding ~/.local/bin =="
                     echo $PATH
                 '''
             }
         }
+
 
         stage('install-pyinstaller') {
             steps {
