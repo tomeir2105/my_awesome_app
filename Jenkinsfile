@@ -14,15 +14,15 @@ pipeline {
                 sh '''
                     set -e
                     sudo apt-get update
-                    sudo apt-get install -y python3 python3-flask python3-dev git curl binutils python3-venv
-
+                    sudo apt-get install -y python3 python3-venv python3-flask python3-dev git curl binutils python3-pip
+        
                     # Install pipx if missing
                     if ! command -v pipx &> /dev/null; then
                         python3 -m pip install --user pipx
-                        ~/.local/bin/pipx ensurepath
                         export PATH="$HOME/.local/bin:$PATH"
+                        ~/.local/bin/pipx ensurepath
                     fi
-
+        
                     # Install pyinstaller if not already installed
                     ~/.local/bin/pipx list | grep -q pyinstaller || ~/.local/bin/pipx install pyinstaller
                 '''
