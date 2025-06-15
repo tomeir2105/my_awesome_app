@@ -1,35 +1,29 @@
 pipeline {
     parameters {
         string(name: 'sleep_time', defaultValue: "4", description: 'Time to sleep after build stage')
-        //choice(name: 'system_name', choices: ['worker1', 'worker2'], description: 'Agent name')
+        // choice(name: 'system_name', choices: ['worker1', 'worker2'], description: 'Agent name')
     }
 
+    // agent { label "${params.system_name}" }
     agent {
         label 'git-agent'
     }
 
     stages {
-        stage('Pre-Build') {
+        stage('pre-Build') {
             steps {
                 sh '''
                     set -e
                     sudo apt-get update
-                    sudo apt-get install -y python3 python3-venv python3-flask python3-dev git curl binutils python3-pip
-        
-                    # Install pipx if missing
-                    if ! command -v pipx &> /dev/null; then
-                        python3 -m pip install --user pipx
-                        export PATH="$HOME/.local/bin:$PATH"
-                        ~/.local/bin/pipx ensurepath
-                    fi
-        
-                    # Install pyinstaller if not already installed
-                    ~/.local/bin/pipx list | grep -q pyinstaller || ~/.local/bin/pipx install pyinstaller
+                    sudo apt-get install -y python3 python3-venv python3-flask python3-dev git curl binutils python3-pip pipx pylint
+
+                    echo "Using pipx from: $(which pipx)"
+                    pipx list | grep -q pyinstaller || pipx install pyinstaller
                 '''
             }
         }
 
-        stage('Lint') {
+        stage('lint') {
             steps {
                 sh '''
                     echo "Running pylint on app.py"
@@ -38,17 +32,16 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('build') {
             steps {
                 sh '''
-                    echo "Building app with PyInstaller"
-                    chmod +x ${HOME}/.local/bin/pyinstaller
-                    ${HOME}/.local/bin/pyinstaller app.py -y
+                    echo "Building with pyinstaller"
+                    pyinstaller app.py -y
                 '''
             }
         }
 
-        stage('Test') {
+        stage('test') {
             steps {
                 sh """
                     echo "Starting app for test..."
